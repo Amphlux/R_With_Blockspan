@@ -48,3 +48,6 @@ If you look at the environment section to the upper-right of the screen you will
 These values are how R is receiving the raw JSON data, parsing it into using R Dataframes to finally produce a visual result.
 If you have ran each step of the markdown successfully, you should see a chart displayed under the Plot section.
 
+![howToPlot](https://github.com/Amphlux/R_With_Blockspan/assets/115769719/f976f70a-e91a-4bdd-a4f5-71a4d9a5da8e)
+
+
