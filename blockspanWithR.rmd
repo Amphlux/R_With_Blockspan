@@ -1,0 +1,320 @@
+---
+title: 'Capstone: Data Viz for Opensea'
+author: 'AJ Whitehead"
+date: "MAY2024"
+output: html_document
+---
+
+# OpenSea Data Viz
+## Capstone project for AJ Whitehead
+
+The purpose of this project is to act as a guide to teach a user Web3 Data Visualization (Web3DataViz for the cool kids) through R programming language. 
+
+An important note: the following is a "Data Chunk". As you follow along with this R Markdown, run each Data Chunk by pressing the green arrow. If you are viewing this as html, you will only see the results.
+
+```{r testrun}
+# Run this Data Chunk by pressing the green arrow to the right.
+# This Data Chunk will execute within the space below, as well
+# as executing in the console below.")
+print("Test Run Success!")
+```
+
+### only for local installations
+
+```{r setwd}
+#only for local RStudio installs
+setwd("~/script/RStudio")
+```
+
+## Getting the Environment Setup
+
+We need to get our environment setup. If you are familiar with python libraries, packages are similar in how they operate. Packages allow us to use various community built tools along with R core.
+
+Tinyverse is a very well known set of data analytic tools. You can use it to gather, parse, prune and otherwise clean and present data in a way that allows users to gather meaningful insights.
+
+We will be using a few packages along with the well-known tidyverse collection, so let us import and activate that library along with others we will be needing.
+- Tidyverse
+- httr
+- jsonlite
+
+```{r Environment Setup}
+# install the required packages. This will take some time.
+install.packages('tidyverse')
+install.packages('httr')
+install.packages("jsonlite")
+
+# load the required packages. This will also take time.
+library(tidyverse)
+library(httr)
+library(jsonlite)
+```
+
+## Import API key
+
+We are going to import an API key. Don't worry, we can use a free API service. Application Programming Interfaces (APIs) allows us to use a digital service provider.
+
+Since we need to connect to the blockchain, we need a service that can provide it as an endpoint for our data. We will be using blockspan.com as our source for an API to connect to the Ethereum chain, along with several other EVMs.
+
+Get your free API key from blockspan.com and paste it into the code below, and run it. This API key is important for your eyes only.
+
+```{r API key}
+# enter your API key here between the quotes
+api <- ''
+```
+## Gathering our data
+
+Now that we've setup the environment, it is time for us to gather our data. First we are going to gather the data that is important to you. We can do this by running the following code chunk (yes, code chunk is the official term btw). You'll see a few places where you will need to enter your own data.
+
+If you look to the right in the Environment tab, you will see different data entries called values. These will be used in our code later on. The environment tab is a good place to look as a data analyist to gather further insights about the context of what you are viewing.
+
+```{r User Data Entry}
+# Enter in a user wallet address you are interested in learning more about between the ''.
+# currently set to Vitalik.eth
+userWallet <- '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+
+# Enter in the contract address of an NFT Collection you are interested in learning more about between the ''.
+# 1 Currently set to Doodles(DOODLE)
+# 2 Currently set to Cryptopunks
+# 3 Currently set to Bored Ape Yacht Club
+collectionContract <- '0x8a90cab2b38dba80c64b7734e58ee1db38b8992e'
+collection2Contract <- '0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB'
+collection3Contract <- '0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d'
+```
+
+# Single NFT Collection
+## Polling Ethereum data from the Blockscan API and returning raw data back.
+
+This next series of code contructs an API call to the Blockscan API that it can interpret. Again, to note: we need a service that allows us to talk to the Ethereum blockchain easily. While this could be implemented in-house, the simplest and most practical way for our purposes is with using API calls to a free specific built service.
+
+Once the API call is resolved, the raw data is returned back, and stored as R data, known as a dataframe(df). We will use more code in the next segment to manipulate the returned df into something more usable.
+
+```{r Single NFT Collection Blockscan Query + JSON}
+# This code constructs an API call to Blockscan that requests back data about a previously specified NFT token contract.
+# This code then generates a structured JSON file in NFT_Single_Collection/ 
+# Date and timestamp yyyy-mm-dd-hh-mm-ss
+# Finally this code generates a parsed dataframe jsonSingleCollection
+
+# Construct URL object + Collection Contract object
+singleCollectionURL <- paste0("https://api.blockspan.com/v1/collections/contract/", collectionContract)
+secondCollectionURL <- paste0("https://api.blockspan.com/v1/collections/contract/", collection2Contract)
+thirdCollectionURL <- paste0("https://api.blockspan.com/v1/collections/contract/", collection3Contract)
+
+# Construct a Query object
+# This will be further modified and implemented into a function in the future
+queryString <- list(chain = "eth-main")
+
+# Construct a generated response 
+# Using httr, receive a response back from the Blockscan API
+# URL + collection + query + header(with api key), 
+# content_type/source from blockscan, format type from blockscan
+# Response is in raw JSON text format
+
+responseSingleCollection <- VERB("GET", singleCollectionURL, query = queryString, add_headers('X-API-KEY' = api), content_type("application/octet-stream"), accept("application/json"))
+responseSecondCollection <- VERB("GET", secondCollectionURL, query = queryString, add_headers('X-API-KEY' = api), content_type("application/octet-stream"), accept("application/json"))
+responseThirdCollection <- VERB("GET", thirdCollectionURL, query = queryString, add_headers('X-API-KEY' = api), content_type("application/octet-stream"), accept("application/json"))
+
+```
+
+## Parse JSON Data to R Data object
+
+If you look over in the Environment tab to the right, you'll notice more and more data starting to pile up. This is ok for now, but we will be using the rm() function to keep it orderly as much as we can.
+
+Within the httr package in R is the content() function. This function serves many functions, but we will be using two for now. The first will be returning the JSON data from the eth blockchain (096 (chain = "eth-main")) directly parsed into an R dataframe.
+
+```{r Parse JSON}
+# Generate parsed JSON data 
+jsonSingleCollection <- content(responseSingleCollection, "parsed", type = "application/json")
+jsonSecondCollection <- content(responseSecondCollection, "parsed", type = "application/json")
+jsonThirdCollection <- content(responseThirdCollection, "parsed", type = "application/json")
+```
+
+## List Function Approach, the importance of Organizing Data
+
+We need to take the raw data that Blockscan returned and organize it in meaningful ways. With this specific API request, we are getting a bunch of JSON data returned, some of which we do not need. Part of Data Analytics is filtering out the meaningful data that we need for our analysis.The following is a function which has been constructed around parsing the returned data into something meaningful.
+A large portion of the data we've received back from Blockscan deals with data from exchanges. NFTs are traded on various platforms distributed across the internet, but for Blockscann's purposes, only 2 of the largest exchanges are tracked, Looksrare and the very well known Opensea.
+We are taking the exchange data and parsing it into 2 separate DFs, exchange_data_df and exchange_stats_df. 
+"Exchange_data" reports back what the exchange knows about a given NFT collection: does OpenSea/Looksrare know its name? The projects socials, twitter, discord? 
+"Exchange_stats" is reporting back numeric data, such as total volume sales, 1-day, 7-day and 30-day volumes, and other relevant numeric datapoints.
+
+```{r The List Approach}
+# Extract both data and stats for each exchange, for each collection
+looksrare_collection1_data <- jsonSingleCollection$exchange_data[[1]]
+looksrare_collection2_data <- jsonSecondCollection$exchange_data[[1]]
+looksrare_collection3_data <- jsonThirdCollection$exchange_data[[1]]
+opensea_collection1_data <- jsonSingleCollection$exchange_data[[2]]
+opensea_collection2_data <- jsonSecondCollection$exchange_data[[2]]
+opensea_collection3_data <- jsonThirdCollection$exchange_data[[2]]
+
+# Function to create data frames from exchange information
+create_exchange_df <- function(data) {
+  tibble(
+    exchange = data$exchange,
+    update_at = data$update_at,
+    key = data$key,
+    name = data$name,
+    description = data$description %||% NA,
+    exchange_url = data$exchange_url,
+    external_url = data$external_url,
+    banner_image_url = data$banner_image_url %||% NA,
+    featured_image_url = data$featured_image_url %||% NA,
+    large_image_url = data$large_image_url %||% NA,
+    image_url = data$image_url %||% NA,
+    chat_url = data$chat_url %||% NA,
+    discord_url = data$discord_url,
+    telegram_url = data$telegram_url %||% NA,
+    twitter_username = data$twitter_username,
+    wiki_url = data$wiki_url %||% NA,
+    instagram_username = data$instagram_username %||% NA
+  )
+}
+
+# Function to create data frames for stats
+create_stats_df <- function(data) {
+  stats <- data$stats
+  
+  # Create a tibble directly with safe handling for NULL values using dplyr's `mutate` and `across`
+  tibble(
+    market_cap = stats$market_cap,
+    num_owners = stats$num_owners,
+    floor_price = stats$floor_price,
+    # floor_price_symbol omitted due to NULL
+    total_minted = stats$total_minted,
+    total_supply = stats$total_supply,
+    total_volume = stats$total_volume,
+    one_day_volume = stats$one_day_volume,
+    seven_day_volume = stats$seven_day_volume,
+    thirty_day_volume = stats$thirty_day_volume,
+    one_day_volume_change = stats$one_day_volume_change,
+    seven_day_volume_change = stats$seven_day_volume_change,
+    thirty_day_volume_change = stats$thirty_day_volume_change,
+    total_sales = stats$total_sales,
+    one_day_sales = stats$one_day_sales,
+    seven_day_sales = stats$seven_day_sales,
+    thirty_day_sales = stats$thirty_day_sales,
+    total_average_price = stats$total_average_price,
+    one_day_average_price = stats$one_day_average_price,
+    seven_day_average_price = stats$seven_day_average_price,
+    thirty_day_average_price = stats$thirty_day_average_price
+  ) %>% 
+    mutate(across(everything(), ~ as.numeric(.) %||% NA)) 
+    # forces all strings into numeric, with NULL returning NA
+}
+
+# Create data frames
+# Collection1
+looksrare_collection1_data_df <- create_exchange_df(looksrare_collection1_data)
+looksrare_collection1_stats_df <- create_stats_df(looksrare_collection1_data)
+opensea_collection1_data_df <- create_exchange_df(opensea_collection1_data)
+opensea_collection1_stats_df <- create_stats_df(opensea_collection1_data)
+# Collection2
+looksrare_collection2_data_df <- create_exchange_df(looksrare_collection2_data)
+looksrare_collection2_stats_df <- create_stats_df(looksrare_collection2_data)
+opensea_collection2_data_df <- create_exchange_df(opensea_collection2_data)
+opensea_collection2_stats_df <- create_stats_df(opensea_collection2_data)
+# Collection3
+looksrare_collection3_data_df <- create_exchange_df(looksrare_collection3_data)
+looksrare_collection3_stats_df <- create_stats_df(looksrare_collection3_data)
+opensea_collection3_data_df <- create_exchange_df(opensea_collection3_data)
+opensea_collection3_stats_df <- create_stats_df(opensea_collection3_data)
+```
+
+## Creating a naming scheeeeema
+We need a common way for the system to remember the names of the three different NFT collections. Doing this manually could be a huge inconvenience and timewaste, so lets automagically have the program extract the name data we want.
+Earlier we created exchange_collection_data. Under that JSON entry, is the 'name' entry. This is the data we need and will extract for future use.
+
+```{r Extract Name Data}
+# Extract a name to use as a later variable
+singleCollectionName <- opensea_collection1_data$name
+secondCollectionName <- opensea_collection2_data$name
+thirdCollectionName <- opensea_collection3_data$name
+
+# Put all the names into a collection for later use
+collection_names <- rep(c(singleCollectionName, secondCollectionName, thirdCollectionName, singleCollectionName, secondCollectionName, thirdCollectionName))
+```
+
+## JSON Print to log
+
+Having access to real-time data analytics is very useful, but without logged data, the resulting viewed data becomes ephemeral data.
+The next batch of code will save the data as a JSON log at the time of running it. It will name and timestamp the data and place it in the NFT_Collection_Data folder. 
+If you click on the JSON files which appear in the folder, they will be difficult to understand. Many JSON readers exist online which can parse this data effectively.
+We are leaving the JSON data raw in these documents (for data best practice) as we can use R to parse the data in a different step.
+
+```{r JSON Print to Log}
+# Save the JSON string to a file in the specified directory 
+# with date and timestamp
+
+# Set the directory path
+nftCollection_dir <- "NFT_Collection_Data/"
+
+# Generate raw text JSON and write it to file
+# Collection1
+jsonSingleCollection_raw <- content(responseSingleCollection, "text")
+write(jsonSingleCollection_raw, file.path(nftCollection_dir, paste0(singleCollectionName, " ", format(Sys.time(), "%Y-%m-%d %H-%M-%S"), ".json")))
+# Remove raw text data, leaving just the compiled file.
+rm(jsonSingleCollection_raw)
+
+# Collection2
+jsonSecondCollection_raw <- content(responseSecondCollection, "text")
+write(jsonSecondCollection_raw, file.path(nftCollection_dir, paste0(secondCollectionName, " ", format(Sys.time(), "%Y-%m-%d %H-%M-%S"), ".json")))
+rm(jsonSecondCollection_raw)
+
+# Collection3
+jsonThirdCollection_raw <- content(responseThirdCollection, "text")
+write(jsonThirdCollection_raw, file.path(nftCollection_dir, paste0(thirdCollectionName, " ", format(Sys.time(), "%Y-%m-%d %H-%M-%S"), ".json")))
+rm(jsonThirdCollection_raw)
+
+```
+
+## Combine Dataframes
+Now that we've organized our data fairly well into relevant chunks, we can begin to combine the blocks of relevant data into eachother to find more interesting insights.
+Dataframes in R are very similar to the idea of a spreadsheet like excel or a database like SQL. DFs layout data in interpretable ways.
+
+#### Combining exchange_data into Dataframe
+Exchange data consists of things such as name, creation date, update timestamp, description, telegram and other socials, etc. This data is mostly qualitative in nature, typed as strings.
+
+```{r combine data df}
+# Combine Exchange Data Into Dataframes
+# Data Dataframes
+opensea_combined_data_df <- bind_rows(opensea_collection1_data_df, opensea_collection2_data_df, opensea_collection3_data_df)
+looksrare_combined_data_df <- bind_rows(looksrare_collection1_data_df, looksrare_collection2_data_df, looksrare_collection3_data_df)
+all_combined_data_df <- bind_rows(opensea_combined_data_df, looksrare_combined_data_df)
+```
+
+#### Combining Exchange Stats into Dataframe
+Exchange stats exists of things such as total volume, market cap, 1 day/7day/30 day volume, holders, etc. This data is all quantitative data in nature, force mutated typed as numeric (integer)
+As there was no indicators as to which collection and which exchange the data was from, bind_rows were implemented for data clarification.
+
+```{r combine stats df}
+# Combine Exchange Stats Into Dataframes
+# Stats Dataframes
+opensea_combined_stats_df <- bind_rows(opensea_collection1_stats_df, opensea_collection2_stats_df, opensea_collection3_stats_df)
+looksrare_combined_stats_df <- bind_rows(looksrare_collection1_stats_df, looksrare_collection2_stats_df, looksrare_collection3_stats_df)
+all_combined_stats_df <- bind_rows(opensea_combined_stats_df, looksrare_combined_stats_df)
+
+# add an 'exchange_name' column to clearly distinguish the rows
+# not needed for data, needed for stats
+combined_stats_df_un <- bind_rows(opensea_combined_stats_df, looksrare_combined_stats_df)
+final_combined_stats_df <- combined_stats_df_un %>% 
+  mutate(exchange_name = c("opensea", "opensea", "opensea", "looksrare", "looksrare", "looksrare"))
+rm(combined_stats_df_un)
+```
+
+## Visualizing The Data
+
+```{r Dataviz with ggplot2}
+opensea_data <- final_combined_stats_df %>%
+  select(Name, market_cap, total_volume) %>%
+  filter(final_combined_stats_df$exchange_name == "opensea")
+opensea_long <- opensea_data %>%
+  pivot_longer(cols = c(market_cap, total_volume), names_to = "metric", values_to = "value")
+ggplot(opensea_long, aes(x = Name, y = value, fill = Name)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  facet_wrap(~ metric, scales = "free_y") +  # Facet by metric, with independent y scales
+  labs(title = "Comparison of Market Cap and Total Volume",
+       subtitle = "Data from Opensea for Three NFT Collections",
+       x = "NFT Collection",
+       y = "Value",
+       fill = "NFT Collection") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis text for readability
+```
