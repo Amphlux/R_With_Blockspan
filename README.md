@@ -32,5 +32,19 @@ For the project, all one needs to do is follow along with the code chunks and en
 
 ![howTo2](https://github.com/Amphlux/R_With_Blockspan/assets/115769719/50025cd8-12b3-489e-9f33-82163738e889)
 
+![howto4](https://github.com/Amphlux/R_With_Blockspan/assets/115769719/aa31dfa7-06cf-4537-b08f-c9154691fe03)
+
 ### An API key from Blockspan
-Once 
+When you get to the Code Chunk containing "api <- ''" you will need to copy and paste your API key between the quote marks.
+Afterwards, you can continue to run the code by clicking on each code chunk in order.
+You will see a section where NFT Collections are defined. You can edit this section with your own favorite NFT collection to see different data results.
+
+![howto5](https://github.com/Amphlux/R_With_Blockspan/assets/115769719/334be036-6b4b-40b2-ac75-04f42faeae4d)
+
+![howto6](https://github.com/Amphlux/R_With_Blockspan/assets/115769719/19d846a0-0b61-4622-b21e-2f329633a571)
+
+If you follow along, you can read what each Code Chunk is axcomplishing as it is ran. 
+If you look at the environment section to the upper-right of the screen you will see values and data populate as you go.
+These values are how R is receiving the raw JSON data, parsing it into using R Dataframes to finally produce a visual result.
+If you have ran each step of the markdown successfully, you should see a chart displayed under the Plot section.
+
