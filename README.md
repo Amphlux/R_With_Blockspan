@@ -13,7 +13,7 @@ Once the data is usable, the code uses ggplot2 to generate visualized data. ***Y
 ### Using the code
 There are 2 files, blockspanWithR.rmd and blockSpanWithR_script.r. For those unfamiliar with R, using an online R interpreter such as Posit is highly recommended.
 Posit is the creator of the widley used and well known RStudio software. However their online cloud is extremely easy to use and comes highly recommended.
-This Blockspan project has been built and publically [available here on Posit]().
+This Blockspan project has been built and publically [available here on Posit](https://posit.cloud/content/8202743).
 
 ![howTo1](https://github.com/Amphlux/R_With_Blockspan/assets/115769719/b582c7c8-a1d8-4fc9-8fd5-a6d3d8146c5d)
 
@@ -21,10 +21,3 @@ Running the code is simple on Posit. All one needs to do is follow along with th
 
 ![howTo2edit](https://github.com/Amphlux/R_With_Blockspan/assets/115769719/50025cd8-12b3-489e-9f33-82163738e889)
 
-
----{rmd blockspanWithR}
-title: 'Capstone: Data Viz for Opensea'
-author: 'AJ Whitehead"
-date: "MAY2024"
-output: html_document
----
