@@ -17,10 +17,10 @@ This Blockspan project has been built and publically [available here on Posit](h
 
 ### Steps to get this working:
 Easy to follow along steps with getting this code working, zero installs required, only the aformentioned Blockspan API key
-1: Open the project on [Posit.cloud](https://posit.cloud/content/8202743) and open the blockspanWithR.rmd file
-2: Run the {r testrun} Code Chunk to get familiar with using R Markdown files (see below)
-3: Get a free API key at [Blockspan](https://blockspan.com/)
-4: Paste the key between the '' quote markts in the appropriate Code Chunk (see below)
+- Open the project on [Posit.cloud](https://posit.cloud/content/8202743) and open the blockspanWithR.rmd file
+- Run the {r testrun} Code Chunk to get familiar with using R Markdown files (see below)
+- Get a free API key at [Blockspan](https://blockspan.com/)
+- Paste the key between the '' quote markts in the appropriate Code Chunk (see below)
 
 ![howto0](https://github.com/Amphlux/R_With_Blockspan/assets/115769719/7c670fd0-f991-4309-be8b-85bd25cc76e1)
 
